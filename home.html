@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Reading App</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.1.2/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-200 min-h-screen flex items-center justify-center">
+    <div class="container mx-auto">
+        <div class="text-center">
+            <h1 class="text-4xl mb-4">Speed Reading App</h1>
+            <form id="textForm" class="mb-4">
+                <textarea id="textInput" class="w-full h-32 p-2 mb-2 border rounded" placeholder="Paste your text here..."></textarea>
+                <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded">Submit</button>
+            </form>
+            <div id="flashWord" class="text-6xl hidden"></div>
+            <div class="mt-4">
+                <button id="pauseButton" class="px-4 py-2 bg-blue-500 text-white rounded hidden">Pause</button>
+                <button id="backButton" class="px-4 py-2 bg-blue-500 text-white rounded hidden ml-2">Back 4 words</button>
+                <div class="slider-container hidden ml-2 inline-block">
+                    <label for="speedSlider" class="mr-2">Speed:</label>
+                    <input id="speedSlider" type="range" min="1" max="10" value="1" class="slider">
+                    <span id="speedValue" class="ml-2">1x</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const textForm = document.getElementById('textForm');
+        const textInput = document.getElementById('textInput');
+        const flashWord = document.getElementById('flashWord');
+        const pauseButton = document.getElementById('pauseButton');
+        const backButton = document.getElementById('backButton');
+        const speedSlider = document.getElementById('speedSlider');
+        const speedValue = document.getElementById('speedValue');
+
+        let text = [];
+        let i = 0;
+        let intervalId;
+        let isPaused = false;
+
+        textForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            text = textInput.value.trim().split(' ');
+            flashWord.classList.remove('hidden');
+            pauseButton.classList.remove('hidden');
+            backButton.classList.remove('hidden');
+            document.querySelector('.slider-container').classList.remove('hidden');
+            startFlashing();
+        });
+
+        pauseButton.addEventListener('click', function() {
+            if (isPaused) {
+                startFlashing();
+                this.textContent = 'Pause';
+                isPaused = false;
+            } else {
+                clearInterval(intervalId);
+                this.textContent = 'Resume';
+                isPaused = true;
+            }
+        });
+
+        backButton.addEventListener('click', function() {
+            i = Math.max(0, i - 4);
+            updateWord();
+        });
+
+        speedSlider.addEventListener('input', function() {
+            speedValue.textContent = this.value + 'x';
+            clearInterval(intervalId);
+            if (!isPaused) {
+                startFlashing();
+            }
+        });
+
+        function startFlashing() {
+            intervalId = setInterval(function() {
+                if (i < text.length) {
+                    updateWord();
+                    i++;
+                } else {
+                    clearInterval(intervalId);
+                }
+            }, 1000 / speedSlider.value);
+        }
+
+        function updateWord() {
+            flashWord.textContent = text[i] || '';
+        }
+    </script>
+</body>
+</html>
